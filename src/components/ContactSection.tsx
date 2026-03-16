@@ -10,10 +10,10 @@ export default function ContactSection() {
   const isInView = useInView(ref, { once: true, margin: '-80px' });
 
   const links = [
-    { label: 'Email', href: `mailto:${personalData.contact.email}`, value: personalData.contact.email },
-    { label: 'GitHub', href: personalData.contact.github, value: 'github.com/shivang' },
-    { label: 'LinkedIn', href: personalData.contact.linkedin, value: 'linkedin.com/in/shivang' },
-    { label: 'Twitter', href: personalData.contact.twitter, value: 'twitter.com/shivang' },
+    { label: 'EMAIL', href: `mailto:${personalData.contact.email}`, value: personalData.contact.email },
+    { label: 'GITHUB', href: personalData.contact.github, value: 'github.com/shivang4857' },
+    { label: 'LINKEDIN', href: personalData.contact.linkedin, value: 'linkedin.com/in/shivang4857' },
+    { label: 'TWITTER', href: personalData.contact.twitter, value: 'x.com/shivang_4857' },
   ];
 
   return (
@@ -50,13 +50,13 @@ export default function ContactSection() {
           The best work begins with a good conversation.
         </motion.p>
 
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))', gap: '12px' }}>
+        <div className="contact-cards-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '16px' }}>
           {links.map((link, i) => (
             <motion.a
               key={link.label}
               href={link.href}
-              target={link.label === 'Email' ? undefined : '_blank'}
-              rel={link.label === 'Email' ? undefined : 'noopener noreferrer'}
+              target={link.label === 'EMAIL' ? undefined : '_blank'}
+              rel={link.label === 'EMAIL' ? undefined : 'noopener noreferrer'}
               initial={{ opacity: 0, y: 10 }}
               animate={isInView ? { opacity: 1, y: 0 } : {}}
               transition={{ delay: 0.2 + i * 0.06, duration: 0.4 }}
@@ -79,11 +79,11 @@ export default function ContactSection() {
                 <span style={{ fontFamily: 'var(--font-body)', fontSize: '12px', fontWeight: 500, letterSpacing: '0.12em', color: 'var(--text-muted)', textTransform: 'uppercase' as const, display: 'block', marginBottom: '6px' }}>
                   {link.label}
                 </span>
-                <span style={{ fontFamily: 'var(--font-body)', fontSize: '15px', color: 'var(--text-secondary)' }}>
+                <span style={{ fontFamily: 'var(--font-body)', fontSize: '15px', fontWeight: 500, color: 'var(--text-primary)' }}>
                   {link.value}
                 </span>
               </div>
-              <span style={{ color: 'var(--text-muted)', fontSize: '16px' }}>&nearr;</span>
+              <span style={{ color: 'var(--text-muted)', fontSize: '18px', transition: 'color 0.2s' }} aria-hidden>↗</span>
             </motion.a>
           ))}
         </div>

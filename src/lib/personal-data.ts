@@ -115,12 +115,13 @@ I think in distributed systems but care about the end user experience. I optimiz
       year: "2026"
     },
     {
-      title: "MeTube — Video Streaming App",
-      tagline: "YouTube-inspired streaming platform built with React.",
-      description: "A video streaming application built as a React project exploring media delivery, component architecture, and real-time UI patterns.",
-      tech: ["React", "JavaScript", "APIs", "CSS"],
-      category: "Frontend",
-      year: "2024"
+      title: "Mystery Message — Anonymous Message Sending Platform",
+      tagline: "Share a unique link, receive messages without revealing the sender's identity.",
+      description: "An anonymous messaging platform built with Next.js where users share a unique link and receive messages without revealing the sender's identity. Features: anonymous messaging via shareable profile/message link, NextAuth for secure inbox management, messages stored in MongoDB, form validation with Zod, modern UI with Tailwind CSS + shadcn/ui, and Resend for email verification/notifications.",
+      tech: ["Next.js", "TypeScript", "MongoDB", "NextAuth", "Zod", "Tailwind CSS", "shadcn/ui", "Resend"],
+      category: "Full-Stack",
+      year: "2025",
+      url: "https://mystery-message-anonymous-message-sending-platfrom.vercel.app"
     }
   ],
 
