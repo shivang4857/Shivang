@@ -24,6 +24,85 @@ interface ChatInterfaceProps {
   onChatModeChange?: (active: boolean) => void;
 }
 
+interface QuerySuggestion {
+  eyebrow: string;
+  label: string;
+  query: string;
+  keywords: string[];
+}
+
+const ROTATING_PLACEHOLDERS = [
+  'Scrolling is outdated. My portfolio is RAG-ask smarter.',
+  "If you're scrolling, you're doing it wrong. Just query.",
+  'I killed scrolling-this portfolio runs on RAG. Ask.',
+  'Scroll if you must. Query if you’re smart.',
+  "Portfolio's indexed. Your move-scroll or query.",
+  'Why scroll like a user when you can query like a dev?',
+] as const;
+
+const QUERY_SUGGESTIONS: QuerySuggestion[] = [
+  {
+    eyebrow: 'ZERO TO ONE',
+    label: 'How he builds from scratch',
+    query: 'What makes Shivang strong in 0-to-1 product and platform builds?',
+    keywords: ['zero to one', '0-1', 'build', 'founding', 'scratch', 'platform', 'product'],
+  },
+  {
+    eyebrow: 'STACK CHECK',
+    label: 'Preferred stack and infra',
+    query: "What's Shivang's preferred tech stack and infrastructure setup?",
+    keywords: ['stack', 'infra', 'backend', 'aws', 'docker', 'kubernetes', 'observability', 'node', 'typescript'],
+  },
+  {
+    eyebrow: 'BEAT22',
+    label: 'What he actually shipped',
+    query: 'What did Shivang build for Beat22 as founding engineer?',
+    keywords: ['beat22', 'built', 'shipped', 'founding engineer', 'marketplace', 'saas'],
+  },
+  {
+    eyebrow: 'EDGE',
+    label: 'Why he is different',
+    query: 'What makes Shivang different from a typical backend engineer?',
+    keywords: ['different', 'edge', 'why', 'unique', 'backend', 'platform'],
+  },
+  {
+    eyebrow: 'WAR STORIES',
+    label: 'Production and DevOps scars',
+    query: 'Tell me about Shivang’s production, DevOps, and distributed systems experience.',
+    keywords: ['devops', 'production', 'distributed', 'systems', 'reliability', 'infra', 'scaling'],
+  },
+  {
+    eyebrow: 'PROJECTS',
+    label: 'Best project walkthrough',
+    query: 'Show me Shivang’s best projects and explain the technical depth behind them.',
+    keywords: ['projects', 'project', 'portfolio', 'technical', 'depth', 'work'],
+  },
+  {
+    eyebrow: 'WORK STYLE',
+    label: 'How he works under pressure',
+    query: 'How does Shivang approach architecture, iteration, and shipping under pressure?',
+    keywords: ['process', 'work style', 'architecture', 'shipping', 'pressure', 'iteration'],
+  },
+  {
+    eyebrow: 'HIRING',
+    label: 'What roles fit him',
+    query: 'What kind of roles is Shivang looking for right now?',
+    keywords: ['hiring', 'roles', 'looking for', 'open to', 'job', 'opportunity'],
+  },
+  {
+    eyebrow: 'CONTACT',
+    label: 'Fastest way to reach him',
+    query: 'How can I contact Shivang for a role or project?',
+    keywords: ['contact', 'reach', 'email', 'linkedin', 'github', 'twitter'],
+  },
+  {
+    eyebrow: 'NOISE FILTER',
+    label: 'Scroll vs query',
+    query: 'Give me the sharp version of Shivang’s portfolio in one answer.',
+    keywords: ['summary', 'quick', 'sharp', 'scroll', 'query', 'overview'],
+  },
+];
+
 const GREETINGS: Message[] = [
   {
     role: 'assistant',
@@ -246,14 +325,36 @@ function getRandomGreeting(): Message {
   return GREETINGS[Math.floor(Math.random() * GREETINGS.length)];
 }
 
-export default function ChatInterface({ placeholder = 'Ask me anything about my work...', onChatModeChange }: ChatInterfaceProps) {
+function getRandomPlaceholder(exclude?: string) {
+  const pool = ROTATING_PLACEHOLDERS.filter(item => item !== exclude);
+  const choices = pool.length > 0 ? pool : ROTATING_PLACEHOLDERS;
+  return choices[Math.floor(Math.random() * choices.length)];
+}
+
+export default function ChatInterface({ placeholder, onChatModeChange }: ChatInterfaceProps) {
   const [messages, setMessages] = useState<Message[]>(() => [getRandomGreeting()]);
   const [input, setInput] = useState('');
   const [isThinking, setIsThinking] = useState(false);
   const [isFocused, setIsFocused] = useState(false);
   const [chatMode, setChatMode] = useState(false);
+  const [currentPlaceholder, setCurrentPlaceholder] = useState(() => placeholder ?? getRandomPlaceholder());
+  const [activeSuggestionIndex, setActiveSuggestionIndex] = useState(-1);
+  const [isSuggestionDismissed, setIsSuggestionDismissed] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const chatAreaRef = useRef<HTMLDivElement>(null);
+  const resolvedPlaceholder = placeholder ?? currentPlaceholder;
+  const normalizedInput = input.trim().toLowerCase();
+  const filteredSuggestions = normalizedInput
+    ? QUERY_SUGGESTIONS.filter((item) => {
+        const haystack = `${item.label} ${item.query} ${item.eyebrow} ${item.keywords.join(' ')}`.toLowerCase();
+        return haystack.includes(normalizedInput);
+      }).slice(0, 5)
+    : [];
+  const visibleSuggestions = filteredSuggestions;
+  const clampedActiveSuggestionIndex = activeSuggestionIndex >= 0 && visibleSuggestions.length > 0
+    ? Math.min(activeSuggestionIndex, visibleSuggestions.length - 1)
+    : -1;
+  const showSuggestionDropdown = Boolean(normalizedInput) && isFocused && !isThinking && !isSuggestionDismissed && visibleSuggestions.length > 0;
 
   const scrollChatToBottom = useCallback(() => {
     if (chatAreaRef.current) {
@@ -264,6 +365,18 @@ export default function ChatInterface({ placeholder = 'Ask me anything about my 
   useEffect(() => {
     scrollChatToBottom();
   }, [messages, isThinking, scrollChatToBottom]);
+
+  useEffect(() => {
+    if (placeholder) {
+      return;
+    }
+
+    const interval = window.setInterval(() => {
+      setCurrentPlaceholder(prev => getRandomPlaceholder(prev));
+    }, 6800);
+
+    return () => window.clearInterval(interval);
+  }, [placeholder]);
 
   const enterChatMode = useCallback(() => {
     if (!chatMode) {
@@ -290,13 +403,42 @@ export default function ChatInterface({ placeholder = 'Ask me anything about my 
 
     setMessages(prev => [...prev, answer]);
     setIsThinking(false);
+    setIsSuggestionDismissed(false);
   }, [isThinking, enterChatMode]);
 
+  const handleSuggestionSelect = useCallback((query: string) => {
+    void handleSend(query);
+  }, [handleSend]);
+
   const handleKeyDown = (e: React.KeyboardEvent) => {
+    if (showSuggestionDropdown && e.key === 'ArrowDown') {
+      e.preventDefault();
+      setActiveSuggestionIndex(prev => (prev < 0 ? 0 : (prev + 1) % visibleSuggestions.length));
+      return;
+    }
+
+    if (showSuggestionDropdown && e.key === 'ArrowUp') {
+      e.preventDefault();
+      setActiveSuggestionIndex(prev => (prev < 0 ? visibleSuggestions.length - 1 : (prev - 1 + visibleSuggestions.length) % visibleSuggestions.length));
+      return;
+    }
+
+    if (showSuggestionDropdown && e.key === 'Enter' && clampedActiveSuggestionIndex >= 0 && visibleSuggestions[clampedActiveSuggestionIndex]) {
+      e.preventDefault();
+      handleSuggestionSelect(visibleSuggestions[clampedActiveSuggestionIndex].query);
+      return;
+    }
+
     if (e.key === 'Enter' && !e.shiftKey) {
       e.preventDefault();
       handleSend(input);
     }
+  };
+
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setActiveSuggestionIndex(-1);
+    setIsSuggestionDismissed(false);
+    setInput(e.target.value);
   };
 
   return (
@@ -420,7 +562,116 @@ export default function ChatInterface({ placeholder = 'Ask me anything about my 
       )}
 
       {/* Input bar — pinned to bottom in chat mode */}
-      <div style={{ flexShrink: 0 }}>
+      <div style={{ flexShrink: 0, position: 'relative' }}>
+        <AnimatePresence>
+          {showSuggestionDropdown && (
+            <motion.div
+              initial={{ opacity: 0, y: 8, scale: 0.98 }}
+              animate={{ opacity: 1, y: 0, scale: 1 }}
+              exit={{ opacity: 0, y: 8, scale: 0.98 }}
+              transition={{ duration: 0.2, ease: 'easeOut' }}
+              style={{
+                position: 'absolute',
+                left: 0,
+                right: 0,
+                bottom: 'calc(100% + 12px)',
+                padding: '10px',
+                borderRadius: '20px',
+                border: '1px solid rgba(212, 168, 83, 0.14)',
+                background: 'rgba(20, 19, 17, 0.96)',
+                backdropFilter: 'blur(16px)',
+                boxShadow: '0 20px 60px rgba(0, 0, 0, 0.34)',
+                zIndex: 4,
+              }}
+            >
+              <div
+                  style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'space-between',
+                    padding: '2px 6px 10px',
+                  }}
+              >
+                <span style={{ fontFamily: 'var(--font-mono)', fontSize: '10px', letterSpacing: '0.14em', color: 'var(--text-muted)' }}>
+                  HOT ROUTES
+                </span>
+                    <motion.button
+                      type="button"
+                  onMouseDown={(e) => {
+                    e.preventDefault();
+                    setActiveSuggestionIndex(-1);
+                    setIsSuggestionDismissed(true);
+                  }}
+                  onClick={() => {
+                    setActiveSuggestionIndex(-1);
+                    setIsSuggestionDismissed(true);
+                  }}
+                  whileHover={{ x: 1 }}
+                  whileTap={{ scale: 0.98 }}
+                  style={{
+                    fontFamily: 'var(--font-mono)',
+                    fontSize: '10px',
+                    letterSpacing: '0.08em',
+                    color: 'rgba(212, 168, 83, 0.78)',
+                    background: 'transparent',
+                    border: 'none',
+                    padding: 0,
+                    cursor: 'pointer',
+                  }}
+                >
+                  QUERY, DON&apos;T GUESS
+                </motion.button>
+              </div>
+
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
+                {visibleSuggestions.map((suggestion, index) => {
+                  const isActive = clampedActiveSuggestionIndex >= 0 && index === clampedActiveSuggestionIndex;
+
+                  return (
+                    <motion.button
+                      key={suggestion.query}
+                      type="button"
+                      onMouseDown={(e) => {
+                        e.preventDefault();
+                        handleSuggestionSelect(suggestion.query);
+                      }}
+                      onClick={() => handleSuggestionSelect(suggestion.query)}
+                      onMouseEnter={() => setActiveSuggestionIndex(index)}
+                      whileHover={{ x: 2 }}
+                      style={{
+                        display: 'grid',
+                        gridTemplateColumns: '84px 1fr',
+                        gap: '14px',
+                        alignItems: 'start',
+                        width: '100%',
+                        padding: '12px 14px',
+                        borderRadius: '14px',
+                        border: isActive ? '1px solid rgba(212, 168, 83, 0.18)' : '1px solid transparent',
+                        background: isActive ? 'rgba(212, 168, 83, 0.08)' : 'rgba(255, 255, 255, 0.02)',
+                        cursor: 'pointer',
+                        textAlign: 'left',
+                        transition: 'all 0.18s ease',
+                      }}
+                    >
+                      <span style={{ fontFamily: 'var(--font-mono)', fontSize: '10px', letterSpacing: '0.12em', color: isActive ? 'var(--accent-primary)' : 'var(--text-muted)' }}>
+                        {suggestion.eyebrow}
+                      </span>
+                      <span style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
+                        <span style={{ fontFamily: 'var(--font-body)', fontSize: '14px', lineHeight: 1.2, color: 'var(--text-primary)' }}>
+                          {suggestion.label}
+                        </span>
+                        <span style={{ fontFamily: 'var(--font-body)', fontSize: '12px', lineHeight: 1.35, color: 'var(--text-secondary)' }}>
+                          {suggestion.query}
+                        </span>
+                      </span>
+                    </motion.button>
+                  );
+                })}
+              </div>
+            </motion.div>
+          )}
+        </AnimatePresence>
+
         <motion.div
           animate={{
             borderColor: isFocused ? 'rgba(212, 168, 83, 0.28)' : 'rgba(200, 180, 140, 0.13)',
@@ -480,11 +731,11 @@ export default function ChatInterface({ placeholder = 'Ask me anything about my 
             <input
               type="text"
               value={input}
-              onChange={(e) => setInput(e.target.value)}
+              onChange={handleInputChange}
               onKeyDown={handleKeyDown}
               onFocus={() => setIsFocused(true)}
               onBlur={() => setIsFocused(false)}
-              placeholder={placeholder}
+              placeholder={resolvedPlaceholder}
               disabled={isThinking}
               style={{
                 flex: 1,

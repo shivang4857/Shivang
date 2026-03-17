@@ -8,12 +8,10 @@ export const personalData = {
   phone: "8319096593",
 
   about: {
-    short: "Founding Engineer with hands-on experience building and scaling production-grade platforms from zero to one. I own architecture, backend systems, infrastructure, and product delivery end to end. I obsessively architect elastic, fault-tolerant distributed backend systems that solve real-world challenges.",
-    long: `I blend deep expertise in cloud-native architectures — serverless, containerization, Infrastructure-as-Code — with strong business acumen to bridge the gap between engineering teams and stakeholders. I deliver robust, scalable solutions that drive growth.
+    short: "Engineer turned builder—shipping 0→1 products, scaling backends, wrangling infra, and building LLM/RAG systems that actually hold up in production (most of the time).",
+    long: ` Build production systems that don’t fall apart when real users show up—spanning distributed backends, DevOps, and AI (LLMs, RAGs, and the occasional GAN experiment). I own the full stack: architecture, infra, and delivery, with cloud-native tools—serverless, containers, IaC—as my default.
 
-Passionate about automation, observability, and DevSecOps best practices, I continuously optimize performance and reliability. I translate complex technical concepts into actionable insights for both technical and non-technical audiences, ensuring alignment and accelerating innovation.
-
-At Beat22, I joined as a founding engineer and led the development of India's first digital sound marketplace. I built and scaled core platform systems including a secure, encrypted HLS-based audio streaming pipeline, a distributed upload system handling 3,000+ uploads with zero breakage, recommendation engines, a credits and wallet system, and KYC-based authentication integrating Aadhaar and passport verification.
+I like my systems scalable, fault-tolerant, and low drama. If it pages me at 3AM, I consider that a design bug. I work close to the business, turning messy ideas into clean systems that move metrics—not just impress engineers.
 
 I think in distributed systems but care about the end user experience. I optimize for reliability over hype, clarity over complexity, and ownership over delegation.`,
     philosophy: "Technology should solve real-world challenges without unnecessary complexity. The best systems are the ones you never have to think about because they just work — reliably, at scale, every time.",
