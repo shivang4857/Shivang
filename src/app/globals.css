@@ -99,6 +99,19 @@ input::placeholder {
   animation: breathe 3s ease-in-out infinite;
 }
 
+/* Header responsive nav */
+@media (max-width: 768px) {
+  .header-nav-desktop {
+    display: none !important;
+  }
+  .header-nav-mobile-toggle {
+    display: flex !important;
+  }
+  .header-nav-mobile {
+    display: block !important;
+  }
+}
+
 @media (max-width: 600px) {
   .contact-cards-grid {
     grid-template-columns: 1fr;

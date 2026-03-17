@@ -20,6 +20,7 @@ const NAV_ITEMS = [
 export default function Header({ onAskClick }: HeaderProps) {
   const [scrolled, setScrolled] = useState(false);
   const [downloading, setDownloading] = useState(false);
+  const [mobileOpen, setMobileOpen] = useState(false);
 
   useEffect(() => {
     const handler = () => setScrolled(window.scrollY > 50);
@@ -92,7 +93,11 @@ export default function Header({ onAskClick }: HeaderProps) {
           </span>
         </motion.div>
 
-        <nav style={{ display: 'flex', alignItems: 'center', gap: '28px' }} className="hidden md:flex">
+        {/* Desktop navigation */}
+        <nav
+          className="header-nav-desktop"
+          style={{ display: 'flex', alignItems: 'center', gap: '28px' }}
+        >
           {NAV_ITEMS.map((item) => (
             <a
               key={item.label}
@@ -122,6 +127,7 @@ export default function Header({ onAskClick }: HeaderProps) {
           ))}
         </nav>
 
+        {/* Desktop actions + mobile hamburger */}
         <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
           {/* CV Download Button */}
           <motion.button
@@ -207,8 +213,113 @@ export default function Header({ onAskClick }: HeaderProps) {
               Ask me
             </span>
           </motion.button>
+
+          {/* Mobile hamburger */}
+          <button
+            type="button"
+            className="header-nav-mobile-toggle"
+            onClick={() => setMobileOpen(prev => !prev)}
+            style={{
+              width: '32px',
+              height: '32px',
+              borderRadius: '50%',
+              border: '1px solid var(--border-default)',
+              background: 'transparent',
+              display: 'none',
+              alignItems: 'center',
+              justifyContent: 'center',
+              padding: 0,
+              cursor: 'pointer',
+            }}
+          >
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
+              {[0, 1, 2].map((i) => (
+                <span
+                  key={i}
+                  style={{
+                    width: '14px',
+                    height: '1px',
+                    background: 'var(--text-secondary)',
+                    transition: 'opacity 0.2s',
+                    opacity: mobileOpen ? (i === 1 ? 0 : 1) : 1,
+                  }}
+                />
+              ))}
+            </div>
+          </button>
         </div>
       </div>
+
+      {/* Mobile nav sheet */}
+      <AnimatePresence>
+        {mobileOpen && (
+          <motion.div
+            initial={{ opacity: 0, y: -10 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -10 }}
+            transition={{ duration: 0.2 }}
+            className="header-nav-mobile"
+            style={{
+              display: 'none',
+              position: 'fixed',
+              top: 64,
+              left: 0,
+              right: 0,
+              padding: '16px 24px 24px',
+              background: 'rgba(17,17,16,0.98)',
+              borderBottom: '1px solid var(--border-subtle)',
+            }}
+          >
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+              {NAV_ITEMS.map((item) => (
+                <button
+                  key={item.label}
+                  type="button"
+                  onClick={() => {
+                    setMobileOpen(false);
+                    document.getElementById(item.href.replace('#', ''))?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                  }}
+                  style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'space-between',
+                    padding: '10px 4px',
+                    background: 'transparent',
+                    border: 'none',
+                    cursor: 'pointer',
+                  }}
+                >
+                  <span style={{ fontFamily: 'var(--font-body)', fontSize: '14px', color: 'var(--text-secondary)' }}>
+                    {item.label}
+                  </span>
+                  <span style={{ color: 'var(--accent-primary)', fontSize: '14px' }}>{item.symbol}</span>
+                </button>
+              ))}
+              <button
+                type="button"
+                onClick={() => {
+                  setMobileOpen(false);
+                  onAskClick();
+                }}
+                style={{
+                  marginTop: '8px',
+                  alignSelf: 'flex-start',
+                  padding: '8px 16px',
+                  borderRadius: '999px',
+                  border: '1px solid var(--border-default)',
+                  background: 'transparent',
+                  fontFamily: 'var(--font-body)',
+                  fontSize: '13px',
+                  color: 'var(--text-secondary)',
+                  cursor: 'pointer',
+                }}
+              >
+                Start a conversation
+              </button>
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </motion.header>
   );
 }
