@@ -10,18 +10,21 @@ import ExperienceSection from '@/components/ExperienceSection';
 import ProjectsSection from '@/components/ProjectsSection';
 import ContactSection from '@/components/ContactSection';
 import Footer from '@/components/Footer';
+import ScrollProvider from '@/components/ScrollProvider';
+import { smoothScrollTo } from '@/lib/scroll';
 
 export default function Home() {
   const handleAskClick = useCallback(() => {
-    window.scrollTo({ top: 0, behavior: 'smooth' });
+    smoothScrollTo(0, 0);
     setTimeout(() => {
-      const input = document.querySelector<HTMLInputElement>('input[placeholder*="Ask me"]');
+      const input = document.querySelector<HTMLInputElement>('input[data-chat-input="true"]');
       input?.focus();
     }, 600);
   }, []);
 
   return (
     <main style={{ minHeight: '100vh', background: 'var(--bg-primary)' }}>
+      <ScrollProvider />
       <Header onAskClick={handleAskClick} />
       <HeroSection />
       <AboutSection />

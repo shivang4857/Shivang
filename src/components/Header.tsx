@@ -3,6 +3,7 @@
 import { motion, AnimatePresence } from 'framer-motion';
 import { useState, useEffect, useCallback } from 'react';
 import { CV_URL } from '@/lib/constants';
+import { smoothScrollTo } from '@/lib/scroll';
 
 interface HeaderProps {
   onAskClick: () => void;
@@ -69,7 +70,7 @@ export default function Header({ onAskClick }: HeaderProps) {
           whileHover={{ opacity: 0.8 }}
           whileTap={{ scale: 0.97 }}
           onClick={() => {
-            window.scrollTo({ top: 0, behavior: 'smooth' });
+            smoothScrollTo(0, 0);
             setTimeout(() => window.location.reload(), 400);
           }}
           role="button"
@@ -102,6 +103,10 @@ export default function Header({ onAskClick }: HeaderProps) {
             <a
               key={item.label}
               href={item.href}
+              onClick={(e) => {
+                e.preventDefault();
+                smoothScrollTo(item.href);
+              }}
               style={{
                 display: 'flex',
                 alignItems: 'center',
@@ -277,7 +282,7 @@ export default function Header({ onAskClick }: HeaderProps) {
                   type="button"
                   onClick={() => {
                     setMobileOpen(false);
-                    document.getElementById(item.href.replace('#', ''))?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                    smoothScrollTo(item.href);
                   }}
                   style={{
                     display: 'flex',

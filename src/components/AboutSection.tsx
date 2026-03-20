@@ -1,14 +1,52 @@
 'use client';
 
 import { motion, useInView } from 'framer-motion';
-import { useRef, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
+import { gsap } from 'gsap';
+import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import { personalData } from '@/lib/personal-data';
+import useEnhancedMotion from '@/hooks/useEnhancedMotion';
 import SectionReveal from './SectionReveal';
+
+gsap.registerPlugin(ScrollTrigger);
 
 export default function AboutSection() {
   const ref = useRef(null);
+  const headingRef = useRef<HTMLHeadingElement>(null);
+  const bodyRef = useRef<HTMLParagraphElement>(null);
+  const philosophyRef = useRef<HTMLDivElement>(null);
+  const valuesRef = useRef<HTMLDivElement>(null);
   const isInView = useInView(ref, { once: true, margin: '-80px' });
   const [expanded, setExpanded] = useState(false);
+  const enhancedMotion = useEnhancedMotion();
+
+  useEffect(() => {
+    if (!enhancedMotion || !ref.current) return;
+
+    const ctx = gsap.context(() => {
+      const trigger = {
+        trigger: ref.current,
+        start: 'top 82%',
+        end: 'bottom top',
+        scrub: 0.45,
+      };
+
+      if (headingRef.current) {
+        gsap.fromTo(headingRef.current, { y: 0 }, { y: -32, ease: 'none', scrollTrigger: trigger });
+      }
+      if (bodyRef.current) {
+        gsap.fromTo(bodyRef.current, { y: 12 }, { y: -10, ease: 'none', scrollTrigger: trigger });
+      }
+      if (philosophyRef.current) {
+        gsap.fromTo(philosophyRef.current, { y: 26 }, { y: -18, ease: 'none', scrollTrigger: trigger });
+      }
+      if (valuesRef.current) {
+        gsap.fromTo(valuesRef.current, { y: 36 }, { y: -8, ease: 'none', scrollTrigger: trigger });
+      }
+    }, ref);
+
+    return () => ctx.revert();
+  }, [enhancedMotion]);
 
   return (
     <SectionReveal id="about">
@@ -27,6 +65,7 @@ export default function AboutSection() {
         </motion.div>
 
         <motion.h2
+          ref={headingRef}
           initial={{ opacity: 0, y: 16 }}
           animate={isInView ? { opacity: 1, y: 0 } : {}}
           transition={{ duration: 0.5, delay: 0.1 }}
@@ -37,6 +76,7 @@ export default function AboutSection() {
         </motion.h2>
 
         <motion.p
+          ref={bodyRef}
           initial={{ opacity: 0 }}
           animate={isInView ? { opacity: 1 } : {}}
           transition={{ duration: 0.5, delay: 0.2 }}
@@ -74,6 +114,7 @@ export default function AboutSection() {
         </button>
 
         <motion.div
+          ref={philosophyRef}
           initial={{ opacity: 0 }}
           animate={isInView ? { opacity: 1 } : {}}
           transition={{ delay: 0.3, duration: 0.5 }}
@@ -95,6 +136,7 @@ export default function AboutSection() {
         </motion.div>
 
         <motion.div
+          ref={valuesRef}
           initial={{ opacity: 0 }}
           animate={isInView ? { opacity: 1 } : {}}
           transition={{ delay: 0.4, duration: 0.5 }}

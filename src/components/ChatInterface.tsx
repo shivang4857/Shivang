@@ -5,6 +5,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import ThinkingIndicator from './ThinkingIndicator';
 import SuggestionChips from './SuggestionChips';
 import { CV_URL } from '@/lib/constants';
+import { smoothScrollTo } from '@/lib/scroll';
 
 interface SectionShortcut {
   id: string;
@@ -386,7 +387,7 @@ export default function ChatInterface({ placeholder, onChatModeChange }: ChatInt
   }, [chatMode, onChatModeChange]);
 
   const handleSectionJump = useCallback((id: string) => {
-    document.getElementById(id)?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    smoothScrollTo(`#${id}`);
   }, []);
 
   const handleSend = useCallback(async (text: string) => {
@@ -730,6 +731,7 @@ export default function ChatInterface({ placeholder, onChatModeChange }: ChatInt
 
             <input
               type="text"
+              data-chat-input="true"
               value={input}
               onChange={handleInputChange}
               onKeyDown={handleKeyDown}
